@@ -154,15 +154,6 @@ bool VideoDecoder::open(const std::string& url, std::string& error,
         frame_interval_ms_ = 1;
     }
 
-    sws_ = sws_getContext(width_, height_, codec_ctx_->pix_fmt,
-                          width_, height_, AV_PIX_FMT_RGB24,
-                          SWS_BILINEAR, nullptr, nullptr, nullptr);
-    if (!sws_) {
-        error = "sws_getContext failed";
-        close();
-        return false;
-    }
-
     packet_ = av_packet_alloc();
     frame_ = av_frame_alloc();
     if (!packet_ || !frame_) {
@@ -189,6 +180,28 @@ bool VideoDecoder::readFrame(FramePtr& out, std::string& error) {
         int ret = avcodec_receive_frame(codec_ctx_, frame_);
 
         if (ret == 0) {
+            const AVPixelFormat src_format =
+                static_cast<AVPixelFormat>(frame_->format);
+            if (!sws_ || frame_->width != sws_width_ ||
+                frame_->height != sws_height_ || src_format != sws_format_) {
+                if (sws_) {
+                    sws_freeContext(sws_);
+                    sws_ = nullptr;
+                }
+                sws_ = sws_getContext(frame_->width, frame_->height, src_format,
+                                      frame_->width, frame_->height,
+                                      AV_PIX_FMT_RGB24, SWS_BILINEAR,
+                                      nullptr, nullptr, nullptr);
+                if (!sws_) {
+                    error = "sws_getContext failed";
+                    av_frame_unref(frame_);
+                    return false;
+                }
+                sws_width_ = frame_->width;
+                sws_height_ = frame_->height;
+                sws_format_ = src_format;
+            }
+
             auto result = std::make_shared<Frame>();
             result->width = frame_->width;
             result->height = frame_->height;
@@ -306,6 +319,9 @@ void VideoDecoder::close() {
     width_ = 0;
     height_ = 0;
     frame_interval_ms_ = 40;
+    sws_width_ = 0;
+    sws_height_ = 0;
+    sws_format_ = AV_PIX_FMT_NONE;
     eof_ = false;
     waiting_keyframe_ = false;
     packet_pending_ = false;

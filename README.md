@@ -14,14 +14,19 @@
 - 通过 FFmpeg 的 `interrupt_callback` 打断阻塞 I/O，关闭窗口时不用等网络超时
 - 每路显示分辨率、FPS、丢帧数、重连次数和解码到显示的延迟
 
+## 环境
+
+验证版本：
+
+| 组件 | 版本 |
+|---|---|
+| 操作系统 | Ubuntu 25.10 |
+| 编译器 | g++ 15.2.0（C++17） |
+| UI | Qt 6.9.2（Widgets） |
+| 音视频库 | FFmpeg 7.1.1 |
+| FFmpeg 组件 | libavformat 61.7.100 / libavcodec 61.19.101 / libswscale 8.3.100 / libavutil 59.39.100 |
+
 ## 构建
-
-依赖：
-
-- C++17 编译器
-- Qt 6 Widgets
-- FFmpeg 7.x（libavformat、libavcodec、libswscale、libavutil）
-- make、pkg-config
 
 Ubuntu 上安装依赖：
 
@@ -53,7 +58,7 @@ make
 ./rtsp_monitor
 ```
 
-### 本地测试
+### 本地 RTSP 测试流
 
 用 [mediamtx](https://github.com/bluenviron/mediamtx) 模拟 4 路 RTSP：
 
@@ -66,6 +71,15 @@ ffmpeg -re -stream_loop -1 -i media/parking.mp4 -an -c copy -f rtsp rtsp://127.0
 ffmpeg -re -stream_loop -1 -i media/backdoor.mp4 -an -c copy -f rtsp rtsp://127.0.0.1:8554/backdoor
 ```
 
+## 测试
+
+```bash
+make test
+make asan-tests
+```
+
+以上测试已在本地通过。
+
 ## 配置
 
 `config/channels.json` 格式如下：
@@ -73,8 +87,8 @@ ffmpeg -re -stream_loop -1 -i media/backdoor.mp4 -an -c copy -f rtsp rtsp://127.
 ```json
 {
   "channels": [
-    { "name": "通道 1 · 大门", "url": "rtsp://127.0.0.1:8554/gate" },
-    { "name": "通道 2 · 仓库", "url": "rtsp://127.0.0.1:8554/warehouse" }
+    { "name": "通道 1 · 大门", "url": "rtsp://127.0.0.1:8554/gate", "transport": "tcp" },
+    { "name": "通道 2 · 仓库", "url": "rtsp://127.0.0.1:8554/warehouse", "transport": "tcp" }
   ]
 }
 ```

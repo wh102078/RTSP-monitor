@@ -46,6 +46,11 @@ private:
     int height_ = 0;
     int frame_interval_ms_ = 40;
 
+    // 当前 sws 上下文对应的源参数；分辨率/格式变化时重建
+    int sws_width_ = 0;
+    int sws_height_ = 0;
+    AVPixelFormat sws_format_ = AV_PIX_FMT_NONE;
+
     bool eof_ = false;
     bool waiting_keyframe_ = false;  // 连接后先等关键帧
     bool packet_pending_ = false;    // send 返回 EAGAIN，包还没被接收
