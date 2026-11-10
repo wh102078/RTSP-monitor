@@ -87,8 +87,8 @@ make asan-tests
 ```json
 {
   "channels": [
-    { "name": "通道 1 · 大门", "url": "rtsp://127.0.0.1:8554/gate", "transport": "tcp" },
-    { "name": "通道 2 · 仓库", "url": "rtsp://127.0.0.1:8554/warehouse", "transport": "tcp" }
+    { "name": "通道 1 · 大门", "url": "rtsp://127.0.0.1:8554/gate" },
+    { "name": "通道 2 · 仓库", "url": "rtsp://127.0.0.1:8554/warehouse" }
   ]
 }
 ```
