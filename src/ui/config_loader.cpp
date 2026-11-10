@@ -53,6 +53,7 @@ bool loadChannelConfigs(const std::string& path,
             continue;
         }
 
+        // 本地相对路径按配置文件所在目录解析
         if (config.url.find("://") == std::string::npos) {
             const QFileInfo file_info(QString::fromStdString(config.url));
             if (file_info.isRelative()) {

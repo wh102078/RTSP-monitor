@@ -47,6 +47,7 @@ int VideoDecoder::interruptCallback(void* opaque) {
         return 0;
     }
 
+    // FFmpeg 在阻塞 I/O 中会反复调用这里，返回 1 就中止
     if (state->stop.load(std::memory_order_relaxed)) {
         return 1;
     }
@@ -79,7 +80,7 @@ bool VideoDecoder::open(const std::string& url, std::string& error,
     const bool is_rtsp = url.rfind("rtsp://", 0) == 0 || url.rfind("rtsps://", 0) == 0;
     if (is_rtsp) {
         av_dict_set(&options, "rtsp_transport", "tcp", 0);
-        av_dict_set(&options, "timeout", "5000000", 0);
+        av_dict_set(&options, "timeout", "5000000", 0);  // 单位是微秒
     }
 
     if (interrupt_) {
@@ -182,6 +183,7 @@ bool VideoDecoder::readFrame(FramePtr& out, std::string& error) {
         if (ret == 0) {
             const AVPixelFormat src_format =
                 static_cast<AVPixelFormat>(frame_->format);
+            // 首帧或中途切换分辨率/像素格式时重建
             if (!sws_ || frame_->width != sws_width_ ||
                 frame_->height != sws_height_ || src_format != sws_format_) {
                 if (sws_) {
@@ -274,6 +276,7 @@ bool VideoDecoder::readFrame(FramePtr& out, std::string& error) {
                 return false;
             }
             if (!eof_) {
+                // 先发空包，把解码器里缓存的帧冲出来
                 eof_ = true;
                 flush_pending_ = true;
                 continue;

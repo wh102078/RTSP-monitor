@@ -62,6 +62,7 @@ void ChannelTile::start() {
     latency_count_ = 0;
     last_latency_ms_ = 0;
 
+    // 队列开小一点，UI 来不及取时自动丢旧帧
     worker_ = std::make_unique<DecodeWorker>(config_.url, 3, !is_rtsp);
     worker_->start();
 }
@@ -72,6 +73,7 @@ void ChannelTile::onTick() {
     }
 
     FramePtr frame;
+    // 非阻塞取最新帧
     if (worker_->queue().tryPopLatest(frame)) {
         latest_ = frame;
         video_->showFrame(frame);
@@ -176,6 +178,7 @@ void ChannelTile::updateFooter(const FramePtr& frame) {
             .arg(avg_latency)
             .arg(QString::fromStdString(stats.last_error)));
 
+    // 设置后每秒往 stderr 打一行，方便脚本采集
     if (qEnvironmentVariableIsSet("RTSP_MONITOR_STATS")) {
         std::fprintf(stderr,
                      "[stats] %s fps=%.1f latency=%lld avg_latency=%lld "

@@ -9,7 +9,7 @@ void FrameQueue::push(FramePtr frame) {
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (queue_.size() >= capacity_) {
-        queue_.pop_front();
+        queue_.pop_front();  // 满了丢最旧帧
         ++dropped_;
     }
 
@@ -39,7 +39,7 @@ bool FrameQueue::tryPopLatest(FramePtr& out) {
         return false;
     }
 
-    out = std::move(queue_.back());
+    out = std::move(queue_.back());  // 只保留最新帧
     queue_.clear();
     return true;
 }

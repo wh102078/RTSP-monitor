@@ -67,6 +67,7 @@ ChannelStats DecodeWorker::stats() const {
 }
 
 bool DecodeWorker::waitForRetry(int attempt) {
+    // 1s -> 2s -> 4s -> 8s -> 10s
     int delay_ms = 1000;
     for (int i = 0; i < attempt && delay_ms < 10000; ++i) {
         delay_ms *= 2;
@@ -144,6 +145,7 @@ void DecodeWorker::run() {
 
             queue_.push(std::move(frame));
 
+            // 本地文件按帧率播放，避免瞬间解完
             if (pace_) {
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(decoder_.frameIntervalMs()));
@@ -170,7 +172,7 @@ void DecodeWorker::run() {
                 std::chrono::steady_clock::now() - connected_at)
                 .count();
         if (connected_ms >= 15000) {
-            attempt = 0;
+            attempt = 0;  // 稳定运行 15s 后重置退避
         }
 
         if (!recovering) {

@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     last_status_update_ = std::chrono::steady_clock::now();
 
     connect(&timer_, &QTimer::timeout, this, &MainWindow::onTick);
-    timer_.setInterval(20);
+    timer_.setInterval(20);  // 20ms 拉一次最新帧
 }
 
 MainWindow::~MainWindow() {

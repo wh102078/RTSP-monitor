@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
 
         std::string error;
         if (!loadChannelConfigs(config_path.toStdString(), channels, error)) {
+            // 配置读取失败时退回本地演示视频
             qWarning() << "load config failed:"
                        << QString::fromStdString(error)
                        << "- fallback to media/gate.mp4";
