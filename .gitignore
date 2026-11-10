@@ -1,0 +1,18 @@
+# build outputs
+rtsp_monitor
+test_frame_queue
+test_video_decoder
+test_decode_worker
+test_frame_queue_asan
+test_video_decoder_asan
+test_decode_worker_asan
+
+out.ppm
+*.o
+build/
+.vscode/
+benchmarks/
+
+# generated media
+test.mp4
+audio_only.m4a
